@@ -2,27 +2,8 @@
 #include <stdlib.h>
 #include "header.h"
 
-/* #define leftWheel 3   // motor
-#define rightWheel 2  // motor
-#define sweeperPort 1 // motor
-#define liftPort 2   // servo
-#define lightPort 0   // infrared analog
-#define topHatPort 8 // analog
-
-#define restPos 1024
-#define pinkVal 0
-#define greenVal 1
-*/
-
-/* void lift();
-void turn(int degree, int direction);
-void move(int speed, int seconds);
-void sweeper(int d,int t);
-void setup(); 
-void decide();
-*/
-void main() {
-	printf("Testing");
+int main() {
+	printf("Testing \n");
 	
 	setup();
 	
@@ -68,6 +49,6 @@ void main() {
 	system("clear");
 	printf("Backing up... \n");
 	move(-500,1);       // back up to avoid vertical projection of bins
-
 	
+	return 0;
 }

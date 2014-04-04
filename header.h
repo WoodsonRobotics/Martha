@@ -1,12 +1,18 @@
-// Created on Thu April 3 2014
-
-// Replace FILE with your file's name
 #ifndef _FILE_H_
 #define _FILE_H_
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~SETUP~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#define leftWheel 3   // motor
+#define rightWheel 2  // motor
+#define sweeperPort 1 // motor
+#define liftPort 2   // servo
 
 #define lightPort 0   // infrared analog
+#define topHatPort 1
+
+#define pinkVal 0
+#define greenVal 1
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~SETUP~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 void setup() {
 	
@@ -20,12 +26,6 @@ void setup() {
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~DECIDE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define leftWheel 3   // motor
-#define rightWheel 2  // motor
-#define sweeperPort 1 // motor
-
-#define pinkVal 0
-#define greenVal 1
 
 void decide() {
 	
@@ -68,8 +68,6 @@ if(get_object_count(pinkVal) > get_object_count(greenVal)) {
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~SWEEPER~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#define sweeperPort 1 // motor
-
 void sweeper(int d,int t) {    // d for direction, -1 in, 1 out
 		mav(sweeperPort,d*500);
 		msleep(t*300);
@@ -78,10 +76,39 @@ void sweeper(int d,int t) {    // d for direction, -1 in, 1 out
 
 // need to know for how long will be sweeping
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~MOVE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~LINE FOLLOWING~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#define leftWheel 3   // motor
-#define rightWheel 2  // motor
+void turn_L() {
+	motor(leftWheel,-70);
+	motor(rightWheel,-45);  	
+}
+void turn_R() {
+	motor(leftWheel,-45);
+	motor(rightWheel,-70);
+}
+int isOnLine() {
+	if (analog10(topHatPort)>700) {
+		return 1;
+	}
+	return 0;
+}
+
+void linefollow() {
+	printf("test");
+	while(digital(8)==0) {
+		if (isOnLine()==0) {
+			turn_R();
+		}
+		else {
+ 
+			turn_L();
+		}
+	}
+
+	
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~MOVE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 void move(int speed, int seconds) {
 		
@@ -95,9 +122,6 @@ void move(int speed, int seconds) {
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~TURN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#define leftWheel 3   // motor
-#define rightWheel 2  // motor
-
 void turn(int degree, int direction) { // degree is in 1,2,3,4 each one being a quarter turn. 
 	                                    // direction is -1 or 1, positive is counterclockwise
 	mav(rightWheel, -800 * direction);
@@ -109,8 +133,6 @@ void turn(int degree, int direction) { // degree is in 1,2,3,4 each one being a 
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~LIFT~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-#define liftPort 2   // servo
 
 void lift() {
 	set_servo_position(liftPort, 1400);
@@ -132,14 +154,6 @@ and touch sensor
 	
 	IDEA:what if the camera tracked the order of the poms as the went into the track?
 	then only regulate how they come out at the end...?
-	- then we'd need to just have the sweeper function going inwards until it    reaches the last pom 
-~
-
-
-
-	
-
-
+	- then we'd need to just have the sweeper function going inwards until it reaches the last pom 
 */
-/* ******NOTES TO MYSELF************** */
 #endif
