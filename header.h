@@ -1,27 +1,26 @@
-#ifndef _FILE_H_
-#define _FILE_H_
+#ifndef _HEADER_H_
+#define _HEADER_H_
 
 #define leftWheel 3   // motor
 #define rightWheel 2  // motor
 #define sweeperPort 1 // motor
-#define liftPort 2   // servo
+#define liftPort 3   // servo
 
 #define lightPort 0   // infrared analog
-#define topHatPort 1
+#define topHatPort 2  // analog
+#define touchPort 15  // analog
 
 #define pinkVal 0
 #define greenVal 1
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~SETUP~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~SETUP~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 void setup() {
 	
-	enable_servos();
-
-	//wait_for_light(lightPort);
+	wait_for_light(lightPort);
 	beep();
 
-	shut_down_in(120);	
+	shut_down_in(118);	
 	
 }
 
@@ -29,37 +28,68 @@ void setup() {
 
 void decide() {
 	
-	camera_close();
-	camera_open(LOW_RES);
+	printf("before loop \n");
 	camera_update();
 
-while((get_object_count(pinkVal) == 0) && (get_object_count(greenVal) == 0)) {
+	while((get_object_count(pinkVal) == 0) && (get_object_count(greenVal) == 0)) {
+		printf("In the null colour \n");
+		mav(sweeperPort, 500); 
+		msleep(200);
+		camera_update();
+	}
 
-	mav(sweeperPort, 200); // test to see what speed and time will give best and continuous accuracy
-	msleep(300);
-	
+	printf("have we found a pom? \n");
 	camera_update();
-}
-
-if(get_object_count(pinkVal) > get_object_count(greenVal)) {
-	mav(rightWheel, -200);
-	msleep(300);
-	mav(rightWheel, 0);
-	mav(sweeperPort, 300);
-	msleep(300);
-	mav(sweeperPort, 0);
-	mav(rightWheel, 200);
-	msleep(300);
-} else if(get_object_count(pinkVal) < get_object_count(greenVal)) {
-		mav(rightWheel, 200);
-		msleep(300);
+	if(get_object_count(pinkVal) > get_object_count(greenVal)) {
+	printf("FOUND POM PINK \n");
+		
+		mav(rightWheel, -800);
+		mav(leftWheel, -800);
+		msleep(600);
 		mav(rightWheel, 0);
-		mav(sweeperPort, 300);
+		mav(leftWheel, 0);
+		mav(sweeperPort, 1500);
+		msleep(1000);
+		mav(sweeperPort, 0);
+		mav(rightWheel, 800);
+		mav(leftWheel, 800);
+		msleep(600);
+		mav(rightWheel, 0);
+		mav(leftWheel, 0);
+		
+
+		mav(sweeperPort, -500);
 		msleep(300);
 		mav(sweeperPort, 0);
-		mav(rightWheel, -200);
-		msleep(300);
-	}
+		
+		msleep(800);
+				
+	} else if(get_object_count(greenVal) > get_object_count(pinkVal)) {
+	printf("FOUND POM GREEN \n");
+	
+			mav(rightWheel, 800);
+			mav(leftWheel, 800);
+			msleep(600);
+			mav(rightWheel, 0);
+			mav(leftWheel, 0);
+			mav(sweeperPort, 1500);
+			msleep(1000);
+			mav(sweeperPort, 0);
+			mav(rightWheel, -800);
+			mav(leftWheel, -800);
+			msleep(600);
+			mav(rightWheel, 0);
+			mav(leftWheel, 0);
+		
+			mav(sweeperPort, -500);
+			msleep(300);
+			mav(sweeperPort, 0);
+		   
+			msleep(800);
+			
+		}
+		camera_update();
+
 }
 
 
@@ -68,13 +98,9 @@ if(get_object_count(pinkVal) > get_object_count(greenVal)) {
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~SWEEPER~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-void sweeper(int d,int t) {    // d for direction, -1 in, 1 out
-		mav(sweeperPort,d*500);
-		msleep(t*300);
-		mav(sweeperPort,0);
-} // for first collection, sweep continuous; for sorting, needs to only output one ball...
-
-// need to know for how long will be sweeping
+void sweeper(int d) {    // d for direction, -1 out, 1 in
+	mav(sweeperPort,(d * 1500));	
+}
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~LINE FOLLOWING~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -87,32 +113,33 @@ void turn_R() {
 	motor(rightWheel,-70);
 }
 int isOnLine() {
-	if (analog10(topHatPort)>700) {
+	if (analog10(topHatPort) > 700) { // > 700 is ON THE LINE
 		return 1;
 	}
 	return 0;
 }
 
-void linefollow() {
-	printf("test");
-	while(digital(8)==0) {
-		if (isOnLine()==0) {
-			turn_R();
-		}
-		else {
- 
-			turn_L();
-		}
+int linefollow() {
+	printf("testing line following");
+	while(digital(touchPort) == 0) {
+		if (isOnLine() == 1) {
+			mav(rightWheel, -500);
+			mav(leftWheel, 500);
+		} else {
+				turn_R();
+				turn_L();
+		  }
+		
 	}
-
+	return 0;
 	
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~MOVE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-void move(int speed, int seconds) {
+void move(int speed, float seconds) {
 		
-	mav(leftWheel, speed);
+	mav(leftWheel, -1*speed);
 	mav(rightWheel, speed);
 	msleep(seconds * 1000);
 	mav(leftWheel, 0);
@@ -122,10 +149,10 @@ void move(int speed, int seconds) {
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~TURN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-void turn(int degree, int direction) { // degree is in 1,2,3,4 each one being a quarter turn. 
+void turn(float degree, int direction) { // degree is in 1,2,3,4 each one being a quarter turn. 
 	                                    // direction is -1 or 1, positive is counterclockwise
-	mav(rightWheel, -800 * direction);
-	mav(leftWheel, -800 * direction);
+	mav(rightWheel, 1000 * direction);
+	mav(leftWheel, 1000 * direction);
 	msleep(750 * degree);
 	mav(rightWheel, 0);
 	mav(leftWheel, 0);
@@ -135,8 +162,8 @@ void turn(int degree, int direction) { // degree is in 1,2,3,4 each one being a 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~LIFT~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 void lift() {
-	set_servo_position(liftPort, 1400);
-
+	enable_servos();
+	set_servo_position(liftPort, 1500);
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~NOTES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

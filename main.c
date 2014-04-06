@@ -3,52 +3,39 @@
 #include "header.h"
 
 int main() {
-	printf("Testing \n");
 	
-	setup();
+	printf("Connected. \n");
+	
+	setup(); // Beep and set timer
 	
 	printf("Hello World! \n I'm Martha and you're about to get rekt. \n");
 	
-	printf("To the poms! \n");
-	move(1500,2);
-	system("clear");
+	sweeper(-1);   // Turn on sweeper to start picking up poms
+	move(750, 7);
+	move(-750, 1);
 	
+	turn(1.368,-1);  // First 45 degree angle turn to poms
 	printf("Munch munch munch... \n");
-	turn(1,1);           // swing around to gather poms
-	sweeper(-1,10);
-	system("clear");
 	
-	printf("To the poms! \n");
-	move(800,5);
-	system("clear");
-	
-	printf("Munch munch munch... \n");
-	turn(2,-1);           // swing around to gather poms
-	sweeper(-1,10);
-	system("clear");
-	
-	printf("To the line! \n");
-	move(800,5);
-	system("clear");
-	
+	move(1500, 1.4);
 	lift();
-	move(100,1);
+	move(800, 1); 
 	
 	system("clear");
 	printf("Sorting... \n");
 	
-	decide();
-	decide();
-	decide();
-	decide();    // eight times because eight poms
-	decide();
-	decide();
-	decide();
-	decide();
+	camera_open(LOW_RES);
+	
+	int i;
+	for(i = 0; i < 3; i++) {
+		decide();
+		printf("pom %d \n", i);	
+	}
+	
+	move(-500,5);       // back up to avoid vertical projection of bins
 	
 	system("clear");
 	printf("Backing up... \n");
-	move(-500,1);       // back up to avoid vertical projection of bins
 	
 	return 0;
 }
